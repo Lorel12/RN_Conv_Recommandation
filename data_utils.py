@@ -6,10 +6,6 @@ import torch
 
 
 def load_movielens_data(data_dir='ml-latest-small', threshold=4.0):
-    """
-    Phase 2: Téléchargement, chargement et nettoyage du dataset MovieLens.
-    Transforme les notes explicites en interactions implicites.
-    """
     ratings_path = os.path.join(data_dir, 'ratings.csv')
     if not os.path.exists(ratings_path):
         raise FileNotFoundError(
@@ -31,9 +27,6 @@ def load_movielens_data(data_dir='ml-latest-small', threshold=4.0):
     num_users = len(user_mapping)
     num_items = len(item_mapping)
 
-    # Split par utilisateur (80 % train / 20 % test) 
-    # Garantit que chaque utilisateur ayant >= 2 interactions est represente
-    # dans les deux ensembles.
     np.random.seed(42)
     train_rows, test_rows = [], []
 
@@ -54,7 +47,7 @@ def load_movielens_data(data_dir='ml-latest-small', threshold=4.0):
     print(f"  Interactions totales : {len(df):,}  →  "
           f"Train : {len(train_df):,}  |  Test : {len(test_df):,}")
 
-    return train_df, test_df, num_users, num_items
+    return train_df, test_df, num_users, num_items, user_mapping, item_mapping
 
 
 def create_adjusted_adjacency(train_df, num_users, num_items):
