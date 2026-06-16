@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightGCN Recommender</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm shadow-indigo-600/20">
+                        <span class="text-white font-bold text-lg">M</span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-900 text-base">
+                            Movies Studio
+                        </h1>
+                        <p class="text-xs text-slate-500 font-medium">
+                            Intelligent Recommendation Platform
+                        </p>
+                    </div>
+                </div>
+                <nav class="flex items-center gap-8">
+                    <a href="/" class="text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-1">
+                        Plateforme
+                    </a>
+                    <a href="/admin" class="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors">
+                        Dashboard Technique
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+        <section class="mb-12">
+            <div class="bg-white border border-slate-200 shadow-sm rounded-3xl overflow-hidden">
+                <div class="grid lg:grid-cols-2 gap-10 p-8 lg:p-10">
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight mb-5 tracking-tight">
+                            Recommandations intelligentes de films
+                        </h1>
+                        <p class="text-slate-600 text-lg leading-relaxed max-w-2xl">
+                            Analyse des interactions historiques des utilisateurs 
+                            et génération automatique de recommandations personnalisées 
+                            grâce au modèle LightGCN.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <form method="GET" action="/" class="w-full bg-slate-50/50 border border-slate-200 rounded-2xl p-6 shadow-xs">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                Utilisateur cible
+                            </label>
+                            <select name="user_id" id="user_id" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-xs transition-all">
+                                {% for u in users %}
+                                <option value="{{ u }}" {% if u == selected_user %}selected{% endif %}>
+                                    User #{{ u }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="calculer" value="true">
+                            <button type="submit" class="w-full mt-5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] transition-all duration-200 text-white font-bold py-3 rounded-xl shadow-md shadow-indigo-600/10 cursor-pointer">
+                                Générer les recommandations
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-14">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Historique des préférences</h2>
+                <p class="text-slate-500 text-sm mt-0.5">Films précédemment appréciés par l'utilisateur (Notes &ge; 4.0)</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for item in historique %}
+                <div class="bg-white border border-slate-200 shadow-xs rounded-2xl p-5 hover:border-indigo-300 hover:shadow-sm transition-all duration-300">
+                    <h3 class="font-semibold text-slate-900 truncate">
+                        {{ item.title }}
+                    </h3>
+                    <p class="text-sm text-slate-500 mt-2 truncate font-medium">
+                        Genre : {{ item.genres }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section>
+            <div class="mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Recommandations</h2>
+                <p class="text-slate-500 text-sm mt-0.5">Résultats générés à la demande par le modèle LightGCN</p>
+            </div>
+            
+            {% if en_attente %}
+            <div class="bg-white border-2 border-dashed border-slate-300 rounded-3xl py-20 text-center shadow-xs">
+                <h3 class="text-slate-800 font-bold text-xl mb-1">Aucune recommandation générée</h3>
+                <p class="text-slate-500 text-sm max-w-sm mx-auto">Sélectionnez un utilisateur dans le panneau ci-dessus puis cliquez sur le bouton pour lancer l'analyse.</p>
+            </div>
+            {% else %}
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for film in recommandations %}
+                <article class="group bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs hover:border-indigo-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                    <div class="h-44 bg-gradient-to-br from-slate-100 to-slate-200/60 border-b border-slate-200 relative">
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200 shadow-xs">
+                                {{ film.score }}% Match
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <p class="text-[11px] font-mono font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Movie #{{ film.movieId }}</p>
+                            <h3 class="font-bold text-slate-900 text-base leading-snug line-clamp-2 min-h-[48px] mb-4 group-hover:text-indigo-600 transition-colors">
+                                {{ film.title }}
+                            </h3>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for genre in film.genres %}
+                            <span class="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200/60">
+                                {{ genre }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
